@@ -1,7 +1,7 @@
 *.o
 misc/*.txt
 misc/*.tar.gz
-in/pgen_tests/*.dat
+
 in/pgen_res/*.dat
 in/exhaust/res/*.dat
 in/exhaust/tests/*.dat
