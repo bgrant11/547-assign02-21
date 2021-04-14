@@ -1,0 +1,121 @@
+thread_limit:		4
+static_depth:		3
+test()...cmp to brute force
+_check_output()
+							cores: 4
+							tree build time:	120
+							query time:		10
+total thread count:	14
+tmp thread count:	0
+max thread count:	4
+
+thread_limit:		4
+static_depth:		3
+test()...cmp to brute force
+_check_output()
+							cores: 4
+							tree build time:	87
+							query time:		4
+total thread count:	19
+tmp thread count:	0
+max thread count:	4
+
+thread_limit:		4
+static_depth:		3
+test()...cmp to brute force
+_check_output()
+							cores: 4
+							tree build time:	97
+							query time:		5
+total thread count:	14
+tmp thread count:	0
+max thread count:	4
+
+thread_limit:		4
+static_depth:		3
+test()...cmp to brute force
+_check_output()
+							cores: 4
+							tree build time:	99
+							query time:		5
+total thread count:	12
+tmp thread count:	0
+max thread count:	4
+
+thread_limit:		4
+static_depth:		3
+test()...cmp to brute force
+_check_output()
+							cores: 4
+							tree build time:	110
+							query time:		3
+total thread count:	14
+tmp thread count:	0
+max thread count:	4
+
+thread_limit:		4
+static_depth:		3
+test()...cmp to brute force
+_check_output()
+							cores: 4
+							tree build time:	84
+							query time:		3
+total thread count:	19
+tmp thread count:	0
+max thread count:	4
+
+thread_limit:		4
+static_depth:		3
+test()...cmp to brute force
+_check_output()
+							cores: 4
+							tree build time:	96
+							query time:		7
+total thread count:	16
+tmp thread count:	0
+max thread count:	4
+
+thread_limit:		4
+static_depth:		3
+test()...cmp to brute force
+_check_output()
+							cores: 4
+							tree build time:	88
+							query time:		5
+total thread count:	14
+tmp thread count:	0
+max thread count:	4
+
+thread_limit:		4
+static_depth:		3
+test()...cmp to brute force
+_check_output()
+							cores: 4
+							tree build time:	86
+							query time:		3
+total thread count:	18
+tmp thread count:	0
+max thread count:	4
+
+thread_limit:		4
+static_depth:		3
+test()...cmp to brute force
+_check_output()
+							cores: 4
+							tree build time:	110
+							query time:		9
+total thread count:	11
+tmp thread count:	0
+max thread count:	4
+
+thread_limit:		4
+static_depth:		3
+test()...cmp to brute force
+_check_output()
+							cores: 4
+							tree build time:	99
+							query time:		8
+total thread count:	10
+tmp thread count:	0
+max thread count:	4
+
