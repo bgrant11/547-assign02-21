@@ -1,0 +1,80 @@
+1
+thread_limit:		2
+static_depth:		1
+							cores: 1
+							tree build time:	5517
+							query time:		324
+total thread count:	0
+tmp thread count:	0
+max thread count:	2
+
+2
+thread_limit:		6
+static_depth:		2
+							cores: 2
+							tree build time:	3009
+							query time:		174
+total thread count:	0
+tmp thread count:	0
+max thread count:	6
+
+3
+thread_limit:		12
+static_depth:		3
+							cores: 3
+							tree build time:	3057
+							query time:		124
+total thread count:	0
+tmp thread count:	0
+max thread count:	12
+
+4
+thread_limit:		14
+static_depth:		3
+							cores: 4
+							tree build time:	2594
+							query time:		95
+total thread count:	0
+tmp thread count:	0
+max thread count:	14
+
+5
+thread_limit:		24
+static_depth:		4
+							cores: 5
+							tree build time:	2791
+							query time:		89
+total thread count:	0
+tmp thread count:	0
+max thread count:	24
+
+6
+thread_limit:		26
+static_depth:		4
+							cores: 6
+							tree build time:	2880
+							query time:		83
+total thread count:	0
+tmp thread count:	0
+max thread count:	26
+
+7
+thread_limit:		28
+static_depth:		4
+							cores: 7
+							tree build time:	2967
+							query time:		79
+total thread count:	0
+tmp thread count:	0
+max thread count:	28
+
+8
+thread_limit:		30
+static_depth:		4
+							cores: 8
+							tree build time:	2595
+							query time:		73
+total thread count:	0
+tmp thread count:	0
+max thread count:	30
+
