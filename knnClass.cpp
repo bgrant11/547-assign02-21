@@ -353,7 +353,7 @@ void KNN::do_queries(){
 		work.push_back(q_args_arr[i]);
 
 	}
-	unsigned int job_cores = this->cores; // = 1;
+	unsigned int job_cores = this->cores * 2; // = 1;
 	pthread_t* workers = new pthread_t[job_cores];
 
 	work_info** w_info = new work_info*[job_cores];
@@ -422,7 +422,7 @@ void* KNN::adhoc_worker(void* vp){
 	///*	
 	cpu_set_t cpuset;	
 	CPU_ZERO(&cpuset);
-	CPU_SET(w_info->work_core, &cpuset);
+	CPU_SET(w_info->work_core % KNN::static_cores, &cpuset);
 	int rc = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
     if (rc != 0){
     	std::cerr << "Error setting affinity_here" << '\n';
