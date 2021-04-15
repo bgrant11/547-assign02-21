@@ -165,7 +165,7 @@ void* KNN::populate_nodes(void* vp){
 	//std::cout << "populate_nodes" << std::endl; // debug	
 	KNN::node_info* info = (KNN::node_info*)vp;	
 	
-	bool affinity = true;
+	bool affinity = false;
 	//bool affinity = false;
 	//int tid;
 	//int rc;	
@@ -700,7 +700,7 @@ KNN::merge_sort(const std::vector<float*> &a, const Range &r,
 															bool is_thread) {
 	//std::cout << "merge_sort" << std::endl;
 	
-	bool affinity = true;
+	bool affinity = false;
 	//bool affinity = false;
 	//int tid;
 	//int rc;	
