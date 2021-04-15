@@ -1216,7 +1216,7 @@ void KNN::set_depth_init_mutex(){
 		KNN::thread_limit = 30 + (2*KNN::static_cores);
 	}
 	//this->static_depth = 2;
-	KNN::thread_limit = 2*this->cores; // 21
+	//KNN::thread_limit = 2*this->cores; // 21
 	std::cout << "thread_limit:\t\t" << KNN::thread_limit << std::endl;
 	std::cout << "static_depth:\t\t" << this->static_depth << std::endl;
 }
