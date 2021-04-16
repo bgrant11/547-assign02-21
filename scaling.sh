@@ -4,7 +4,7 @@
 
 
 exec > scaling-out.txt
-cores=4
+cores=8
 for ((i=1;i<=$cores;i++));
 		do
 
