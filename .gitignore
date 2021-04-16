@@ -8,3 +8,8 @@ in/exhaust/tests/*.dat
 in/i/*.dat
 k-nn
 merge
+
+
+in/pgen_tests/data_10000000-7-2.dat
+in/pgen_tests/query_100000-7-2-7.dat
+

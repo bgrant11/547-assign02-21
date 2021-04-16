@@ -44,8 +44,8 @@ cleanpgen:
 
 
 new-large-gen:
-	./p_training_data 1000000 7 2
-	./p_query_file 100 7 2 7
+	./p_training_data 10000000 7 2
+	./p_query_file 100000 7 2 7
 
 # 22171525
 # q = 5

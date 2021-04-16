@@ -43,7 +43,8 @@ new-script: new.sh
 	./new.sh 10000 10010 
 
 new-large: k-nn
-	./k-nn 1 in/pgen_tests/data_1000000-7-2.dat in/pgen_tests/query_100-7-2-7.dat in/new.dat
+	#./k-nn 1 in/pgen_tests/data_1000000-7-2.dat in/pgen_tests/query_100-7-2-7.dat in/new.dat
+	./k-nn 4 in/pgen_tests/data_10000000-7-2.dat in/pgen_tests/query_100000-7-2-7.dat in/new.dat
 	rm -f in/new.dat
 
 
@@ -145,7 +146,9 @@ gdb: k-nn
 	#gdb --args k-nn 2 in/i/data_11094451.dat in/i/query_11094451.dat in/result5
 	
 	#21 gdb --args k-nn 4 in/i/data_22174247.dat in/i/query_22174247.dat in/result3
-	gdb --args k-nn 1 in/pgen_tests/data_1000000-7-2.dat in/pgen_tests/query_100-7-2-7.dat in/new.dat
+	#gdb --args k-nn 1 in/pgen_tests/data_1000000-7-2.dat in/pgen_tests/query_100-7-2-7.dat in/new.dat
+
+	gdb --args k-nn 4 in/pgen_tests/data_10000000-7-2.dat in/pgen_tests/query_100000-7-2-7.dat in/new.dat
 
 
 inter:

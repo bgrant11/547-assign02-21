@@ -264,20 +264,35 @@ max thread count:	4
 
 
 
+//--------------
 
 
 
 
 
 
+thread_limit:		14
+static_depth:		3
+							cores: 4
+							tree build time:	82.004 s
+							query time:		200.349 s
+total thread count:	0
+tmp thread count:	0
+max thread count:	14
 
 
 
 
 
 
-
-
+thread_limit:		14
+static_depth:		3
+							cores: 4
+							tree build time:	192.189 s
+							query time:		408.492 s
+total thread count:	0
+tmp thread count:	0
+max thread count:	14
 
 
 

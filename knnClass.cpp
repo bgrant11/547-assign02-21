@@ -74,17 +74,19 @@ void KNN::make_tree(){
 		this->root->point = t_pts[0];
 		return;
 	}
-	//TODO conditional <100
+
 	//std::cout << "total threads before: " << KNN::static_total_threads << std::endl;
-	auto merge_begin = std::chrono::steady_clock::now();
+	
+	//auto merge_begin = std::chrono::steady_clock::now();
+	
 	std::vector<float*> a = 
 		this->merge_sort(t_pts, Range{0, ssize_t(t_pts.size()/4)}, depth, dim, 
 																		false);
 			
-	auto merge_end = std::chrono::steady_clock::now();
-	auto merge_interval = 
-				std::chrono::duration_cast<std::chrono::milliseconds>
-				(merge_end-merge_begin);
+	//auto merge_end = std::chrono::steady_clock::now();
+	//auto merge_interval = 
+	//			std::chrono::duration_cast<std::chrono::milliseconds>
+	//			(merge_end-merge_begin);
 	//21 std::cout << "mergesort time:\t\t" << merge_interval.count() << std::endl;
 	//21 std::cout << "total msort threads:\t" << KNN::static_total_threads << std::endl;	
 	//std::cout << "depth: " << depth << std::endl;	
@@ -97,7 +99,7 @@ void KNN::make_tree(){
 	std::vector<float*> left;
 	std::vector<float*> right;	
 
-	auto split_begin = std::chrono::steady_clock::now();
+	//auto split_begin = std::chrono::steady_clock::now();
 	float median = this->get_median_and_split(a, dim);
 	for(unsigned long i = 0; i < this->num_training_pts; i++){
 		if(t_pts[i][0] < median){
@@ -106,10 +108,10 @@ void KNN::make_tree(){
 			right.push_back(t_pts[i]);
 		}
 	}	
-	auto split_end = std::chrono::steady_clock::now();
-	auto split_interval = 
-				std::chrono::duration_cast<std::chrono::milliseconds>
-				(split_end-split_begin);
+	//auto split_end = std::chrono::steady_clock::now();
+	//auto split_interval = 
+	//			std::chrono::duration_cast<std::chrono::milliseconds>
+	//			(split_end-split_begin);
 	//std::cout << "split time: " << split_interval.count() << std::endl;
 	
 	//std::cout << "median: " << median << std::endl; // debug
@@ -164,21 +166,23 @@ void KNN::make_tree(){
 void* KNN::populate_nodes(void* vp){
 	//std::cout << "populate_nodes" << std::endl; // debug	
 	KNN::node_info* info = (KNN::node_info*)vp;	
+
 	
 	bool affinity = false;
 	//bool affinity = false;
 	//int tid;
 	//int rc;	
 	//cpu_set_t cpuset;	
+
+	/*
+	bool affinity = false;
+
+
 	if(affinity && info->is_thread){
-		//tid = KNN::get_thread_id();
-				
-		//KNN::set_socket_affinity(cpuset, tid);
-		//KNN::set_core_affinity(cpuset, tid);
-		//KNN::set_logical_affinity(cpuset, tid);
+
 		KNN::affinity();
 	}	
-
+	*/
 
 	if(info->a.size() != 0){
 		
@@ -201,7 +205,6 @@ void* KNN::populate_nodes(void* vp){
 		}		
 		//info->obj->_print(info->a); // debug
 		std::vector<float*> a_sorted = info->obj->merge_sort(info->a, 
-											//Range{0, ssize_t(info->a.size()/4)},
 											Range{0, ssize_t(local_end)},
 											info->depth,
 											info->dimension, false);
@@ -227,32 +230,12 @@ void* KNN::populate_nodes(void* vp){
 		info->n->parent = info->parent;			
 		unsigned long new_depth = info->depth + 1;
 		unsigned long new_dim = info->obj->cycle_dimensions(info->dimension);	
-		
-	/*
-		const node_info* const l_info = 
-					new node_info{left, new_depth, new_dim, info->n->l_child,
-															info->n, info->obj};
-		const node_info* const r_info = 
-					new node_info{right, new_depth, new_dim, info->n->r_child,
-															info->n, info->obj};
-	*/
-	
-		if(info->depth < static_depth){	
-			/*			
-			const node_info* const l_info = 
-					new node_info{left, new_depth, new_dim, info->n->l_child,
-													info->n, info->obj, true};
-			const node_info* const r_info = 
-					new node_info{right, new_depth, new_dim, info->n->r_child,
-													info->n, info->obj, true};			
-			*/
 
-	
+		if(info->depth < static_depth){	
+
 			pthread_t l_tid, r_tid;
 			int rv;	
 			
-			
-
 			bool l = false;
 			bool r = false;
 			if(KNN::make_thread()){
@@ -262,7 +245,7 @@ void* KNN::populate_nodes(void* vp){
 													info->n, info->obj, true};				
 				l = true;				
 				rv = pthread_create(&l_tid, nullptr, populate_nodes, (void*)l_info); 
-				assert(rv == 0);
+				//assert(rv == 0);
 			} else{
 				const node_info* const l_info = 
 					new node_info{left, new_depth, new_dim, info->n->l_child,
@@ -278,7 +261,7 @@ void* KNN::populate_nodes(void* vp){
 
 				r = true;
 				rv = pthread_create(&r_tid, nullptr, populate_nodes, (void*)r_info); 
-				assert(rv == 0);
+				//assert(rv == 0);
 			} else{
 				const node_info* const r_info = 
 					new node_info{right, new_depth, new_dim, info->n->r_child,
@@ -316,25 +299,14 @@ void KNN::do_queries(){
 	//exit(0);
 	
 	unsigned long * num_found = new unsigned long[this->num_queries]();
-	//std::priority_queue<nearest_point, std::vector<nearest_point>,
-	//		priority_compare>** results = new std::priority_queue<nearest_point, 
-	//		std::vector<nearest_point>, priority_compare>*[this->num_queries];
-	//result_queue** results_nearest = new result_queue*[this->num_queries];	
-	/*	
-	for(unsigned long i = 0; i < this->num_queries; ++i){
-		std::cout << num_found[i] << std::endl;
-	}
-	*/
-	
+
 
 	//std::cout << "do_queries" << std::endl;
 
-	//void* vp;
 	//std::cout << "k= " << this->k << std::endl;
 	std::vector<std::vector<float>> closest_dim_pt
 			(this->num_queries, std::vector<float>(this->num_dimensions, 0.0));
-	//float* closest_dim_pt = new float[this->num_dimensions] ();
-	//TODO check if they are zero	
+
 	float* closest_dim_pt_dist = new float[this->num_queries];
 	
 	query_args** q_args_arr = new query_args*[this->num_queries];
@@ -359,34 +331,25 @@ void KNN::do_queries(){
 	work_info** w_info = new work_info*[job_cores];
 	for(unsigned int i = 0; i < job_cores; i++){
 		w_info[i] = new work_info{i, work};	
-		//w_info[i].work_core = i;
-		//w_info[i].work = &work;
 		rv = pthread_create(&(workers[i]), nullptr, adhoc_worker, (void*)(w_info[i]));
-		if(rv != 0){
-			std::cout << "problem creating worker thread" << std::endl;
-			exit(1);
-		}
+		//if(rv != 0){
+		//	std::cout << "problem creating worker thread" << std::endl;
+		//	exit(1);
+		//}
 	}
 	for(unsigned long i = 0; i < job_cores; i++){
 		rv = pthread_join(workers[i], nullptr);
-		if(rv != 0){
-			std::cout << "problem joining workers" << std::endl;
-			exit(1);
-		}
+		//if(rv != 0){
+		//	std::cout << "problem joining workers" << std::endl;
+		//	exit(1);
+		//}
 	}
 	//21 std::cout << "after join" << std::endl;
-	//for(unsigned long i = 0; i < this->num_queries; ++i){	
 
-	//	vp = KNN::query_nodes((void*)q_args_arr[i]);
-	//	result_queue* res = (result_queue*) vp;
-	//	results_nearest[i] = res;
-	//}
 	this->results = new std::vector<nearest_point>[this->num_queries];
 	for(unsigned long i = 0; i < this->num_queries; ++i){
 		for(unsigned long j = 0; j < this->k; ++j){
-			//this->results[i].push_back(results_nearest[i]->top());
 			this->results[i].push_back(q_args_arr[i]->queue->top());
-			//results_nearest[i]->pop();
 			q_args_arr[i]->queue->pop();
 		}
 	}
@@ -409,7 +372,7 @@ void KNN::do_queries(){
 	delete[] q_args_arr;
 	delete[] workers;
 	
-	//delete[] results_nearest;
+
 	
 
 }
@@ -424,34 +387,34 @@ void* KNN::adhoc_worker(void* vp){
 	CPU_ZERO(&cpuset);
 	CPU_SET(w_info->work_core % KNN::static_cores, &cpuset);
 	int rc = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
-    if (rc != 0){
-    	std::cerr << "Error setting affinity_here" << '\n';
-   	}
+    //if (rc != 0){
+    //	std::cerr << "Error setting affinity_here" << '\n';
+   	//}
 	//*/
 	KNN::query_args * job;
 	while(true){
 		rv = pthread_spin_lock(&KNN::thread_lock);
-		if(rv != 0){
-			std::cout << "problem locking in worker" << std::endl;
-			exit(1);
-		}
+		//if(rv != 0){
+		//	std::cout << "problem locking in worker" << std::endl;
+		//	exit(1);
+		//}
 		idx = w_info->work.size();
 		//std::cout << "size: " << idx << std::endl;
 		if(idx == 0) {
 			rv = pthread_spin_unlock(&KNN::thread_lock);
-			if(rv != 0){
-				std::cout << "problem unlocking in worker" << std::endl;
-				exit(1);
-			}
+			//if(rv != 0){
+			//	std::cout << "problem unlocking in worker" << std::endl;
+			//	exit(1);
+			//}
 			return nullptr;
 		}
 		job = w_info->work[idx-1];
 		w_info->work.pop_back();
 		rv = pthread_spin_unlock(&KNN::thread_lock);
-		if(rv != 0){
-			std::cout << "problem unlocking in worker" << std::endl;
-			exit(1);
-		}
+		//if(rv != 0){
+		//	std::cout << "problem unlocking in worker" << std::endl;
+		//	exit(1);
+		//}
 		//std::cout << "job :" << job << std::endl;
 		KNN::query_nodes((void*)(job));
 		
@@ -461,30 +424,13 @@ void* KNN::adhoc_worker(void* vp){
 
 
 void* KNN::query_nodes(void* vp){
-	bool debug = false;	
+	//bool debug = false;	
 	query_args* q_args = (query_args*) vp;	
-	if(debug){	
-		std::cout << "("<< q_args->query_point[0] << ", ";
-		std::cout << q_args->query_point[1] << "): ";	
-	}
+	//if(debug){	
+	//	std::cout << "("<< q_args->query_point[0] << ", ";
+	//	std::cout << q_args->query_point[1] << "): ";	
+	//}
 
-	// DONT THINK I NEED TODO
-	/*
-	//std::vector<float> new_closest_dim_pt(q_args->closest_dim_pt);
-	//new_closest_dim_pt[q_args->node->dimension] = q_args->node->median;
-	
-	float tmp = q_args->closest_dim_pt[q_args->node->dimension];
-	q_args->closest_dim_pt[q_args->node->dimension] = q_args->node->median;
-	float test_dist = 
-			q_args->obj->distance(q_args->query_point, q_args->closest_dim_pt);
-	if(test_dist < q_args->closest_dim_pt_dist){
-		q_args->closest_dim_pt_dist = test_dist;
-	} else {
-		q_args->closest_dim_pt[q_args->node->dimension] = tmp;
-	}
-	*/
-	// END DONT THINK I NEED TODO
-	
 	float distance;	
 	Node* first;
 	Node* second;
@@ -493,47 +439,43 @@ void* KNN::query_nodes(void* vp){
 	bool first_alloc = false;
 	bool second_alloc = false;	
 	if(q_args->node->num_pts == 1){ // if at leaf
-		if(debug){		
-			std::cout << "leaf, (";
-			std::cout << q_args->node->point[0] << ", ";
-			std::cout << q_args->node->point[1] << "), ";
-		}		
+		//if(debug){		
+		//	std::cout << "leaf, (";
+		//	std::cout << q_args->node->point[0] << ", ";
+		//	std::cout << q_args->node->point[1] << "), ";
+		//}		
 		distance = q_args->obj->distance(q_args->query_point, 
 														q_args->node->point);		
 		if(q_args->num_found < q_args->obj->k){ //grab pt if < k found
-			if(debug){			
-				std::cout << "<k, ADD_PT, ";
-			}			
+			//if(debug){			
+			//	std::cout << "<k, ADD_PT, ";
+			//}			
 			q_args->queue->push(nearest_point{q_args->node->point, distance,
 														nullptr, nullptr});
 			
 			q_args->num_found++;
 		} else{
-			if(debug){
-				std::cout << "has_k, distance = ";
-				std::cout << distance << ", furthest = ";
-				std::cout << q_args->queue->top().distance << ", ";
-			}
+			//if(debug){
+			//	std::cout << "has_k, distance = ";
+			//	std::cout << distance << ", furthest = ";
+			//	std::cout << q_args->queue->top().distance << ", ";
+			//}
 
 			if(distance < q_args->queue->top().distance){ // grab if closer than
 				q_args->queue->pop();					// a current pt
 				q_args->queue->push(nearest_point{q_args->node->point, distance,
 														nullptr, nullptr});
-				if(debug){				
-					std::cout << "ADD_PT" << std::endl;
-				}
-			} else{
-				if(debug){				
-					std::cout << "no_add_pt" << std::endl;
-				}
-			}	
+				//if(debug){				
+				//	std::cout << "ADD_PT" << std::endl;
+				//}
+			} //else{
+			//	if(debug){				
+			//		std::cout << "no_add_pt" << std::endl;
+			//	}
+			//}	
 		}
 	} else{ // if not at leaf
 		
-
-		//std::vector<float> new_closest_dim_pt(q_args->closest_dim_pt);
-		//new_closest_dim_pt[q_args->node->dimension] = q_args->node->median;
-	
 		float tmp = q_args->closest_dim_pt[q_args->node->dimension];
 		q_args->closest_dim_pt[q_args->node->dimension] = q_args->node->median;
 		float test_dist = 
@@ -544,22 +486,22 @@ void* KNN::query_nodes(void* vp){
 			q_args->closest_dim_pt[q_args->node->dimension] = tmp;
 		}
 
-		if(debug){
-			std::cout << "not_leaf, (" << q_args->node->dimension << ", ";	
-			std::cout << q_args->node->median << "), ";	
-		}
+		//if(debug){
+		//	std::cout << "not_leaf, (" << q_args->node->dimension << ", ";	
+		//	std::cout << q_args->node->median << "), ";	
+		//}
 
 		if(q_args->query_point[q_args->node->dimension] < q_args->node->median){
-			if(debug){			
-				std::cout << "left_first";	
-			}		
+			//if(debug){			
+			//	std::cout << "left_first";	
+			//}		
 			
 			first = q_args->node->l_child;  // determine which child to go to
 			second = q_args->node->r_child;	// first
 		} else{
-			if(debug){			
-				std::cout << "right_first";	
-			}		
+			//if(debug){			
+			//	std::cout << "right_first";	
+			//}		
 			first = q_args->node->r_child;
 			second = q_args->node->l_child;
 			
@@ -572,26 +514,26 @@ void* KNN::query_nodes(void* vp){
 								nullptr, q_args->queue, q_args->closest_dim_pt,
 								q_args->closest_dim_pt_dist};
 		first_alloc = true;
-		if(debug){		
-			std::cout << std::endl;
-		}
+		//if(debug){		
+		//	std::cout << std::endl;
+		//}
 		
 		if(first != nullptr) KNN::query_nodes((void*)first_args);
-		if(debug){		
-			std::cout << "("<< q_args->query_point[0] << ", ";
-			std::cout << q_args->query_point[1] << "): ";
-			std::cout << "BACK: (" << q_args->node->dimension << ", ";	
-			std::cout << q_args->node->median << "), ";
-			std::cout << "num_found = " << q_args->num_found << ", ";
-		}
+		//if(debug){		
+		//	std::cout << "("<< q_args->query_point[0] << ", ";
+		//	std::cout << q_args->query_point[1] << "): ";
+		//	std::cout << "BACK: (" << q_args->node->dimension << ", ";	
+		//	std::cout << q_args->node->median << "), ";
+		//	std::cout << "num_found = " << q_args->num_found << ", ";
+		//}
 		
 		q_args->closest_dim_pt[q_args->node->dimension] = q_args->node->median;
 		q_args->closest_dim_pt_dist = 
 			q_args->obj->distance(q_args->query_point, q_args->closest_dim_pt);
 		if(q_args->num_found < q_args->obj->k){ // if less than k pts go to 
-			if(debug){			
-				std::cout << "<k, descend, " << std::endl;			
-			}			
+			//if(debug){			
+			//	std::cout << "<k, descend, " << std::endl;			
+			//}			
 			second_args = new query_args{q_args->query_point, // other child
 								q_args->num_found, second, q_args->obj, nullptr, 
 								nullptr, q_args->queue, q_args->closest_dim_pt,
@@ -599,33 +541,22 @@ void* KNN::query_nodes(void* vp){
 			second_alloc = true;
 			if(second != nullptr) KNN::query_nodes((void*)second_args);
 		} else { // if k pts but dist from query to partition < current:go other
-			if(debug){			
-				std::cout << "has_k, dist_to_part = ";	
-			}		
-			float* pt = new float[2];			
-			if(q_args->node->dimension == 0){
-				pt[0] = q_args->node->median;
-				pt[1] = second->median;
-			}
-			else{	
-				pt[1] = q_args->node->median;
-				pt[0] = second->median;
-			}
-			//std::cout << q_args->query_point[
-			//float dist_to_partition = q_args->obj->distance(q_args->query_point, pt);
+			//if(debug){			
+			//	std::cout << "has_k, dist_to_part = ";	
+			//}		
+		
 			float dist_to_partition = q_args->query_point[q_args->node->dimension] -
 						 q_args->node->median;
 			dist_to_partition *=dist_to_partition;
 			//std::cout << dist_to_partition << ", furthest = ";
-			if(debug){			
-				std::cout << q_args->queue->top().distance << ", ";
-			}
-			//if(dist_to_partition < q_args->queue->top().distance){
-			//if(q_args->closest_dim_pt_dist < q_args->queue->top().distance){
+			//if(debug){			
+			//	std::cout << q_args->queue->top().distance << ", ";
+			//}
+
 			if(dist_to_partition < q_args->queue->top().distance){		
-				if(debug){
-					std::cout << "descend" << std::endl;	
-				}
+				//if(debug){
+				//	std::cout << "descend" << std::endl;	
+				//}
 			
 				second_args = new query_args{q_args->query_point, 
 								q_args->num_found, second, q_args->obj, nullptr, 
@@ -633,31 +564,31 @@ void* KNN::query_nodes(void* vp){
 								q_args->closest_dim_pt_dist};
 				second_alloc = true;
 				if(second != nullptr) KNN::query_nodes((void*)second_args);
-			} else {
-				if(debug){				
-					std::cout << "go_up" << std::endl;
-				}
-			}
-			delete[] pt;
+			}// else {
+			//	if(debug){				
+			//		std::cout << "go_up" << std::endl;
+			//	}
+			//}
+			//delete[] pt; part of old test
 		}
 	}
-	if(debug){
-		std::cout << "("<< q_args->query_point[0] << ", ";
-		std::cout << q_args->query_point[1] << "), ";
-		std::cout << "(" << q_args->node->dimension << ", ";	
-		std::cout << q_args->node->median << "), ";
-		std::cout << "go_up" << std::endl;
-	}
+	//if(debug){
+	//	std::cout << "("<< q_args->query_point[0] << ", ";
+	//	std::cout << q_args->query_point[1] << "), ";
+	//	std::cout << "(" << q_args->node->dimension << ", ";	
+	//	std::cout << q_args->node->median << "), ";
+	//	std::cout << "go_up" << std::endl;
+	//}
 	if(first_alloc) delete first_args;
 	if(second_alloc) delete second_args;	
 	
 	result_queue* ret = q_args->queue;
-	//delete q_args->queue;
-	//delete q_args;
+
 	return ret;
+	
 }
 
-float KNN::distance(const float* query, const float* point){
+inline float KNN::distance(const float* query, const float* point){
 	float distance = 0.0f;	
 	for(unsigned long i = 0; i < this->num_dimensions; ++i){
 		distance += this->square(query[i] - point[i]);
@@ -665,7 +596,7 @@ float KNN::distance(const float* query, const float* point){
 	return distance;
 }
 
-float KNN::distance(const float* query, const std::vector<float> point){
+inline float KNN::distance(const float* query, const std::vector<float> point){
 	float distance = 0.0f;	
 	for(unsigned long i = 0; i < this->num_dimensions; ++i){
 		distance += this->square(query[i] - point[i]);
@@ -673,11 +604,11 @@ float KNN::distance(const float* query, const std::vector<float> point){
 	return distance;
 }
 
-float KNN::square(float a){
+inline float KNN::square(float a){
 	return a*a;
 }
 
-void KNN::cpy_to_vect(std::vector<float*> &v){
+inline void KNN::cpy_to_vect(std::vector<float*> &v){
 	for(unsigned long i = 0; i < this->num_training_pts; ++i){
 		v.push_back(this->train_pts[i]);
 	}
@@ -700,20 +631,13 @@ KNN::merge_sort(const std::vector<float*> &a, const Range &r,
 															bool is_thread) {
 	//std::cout << "merge_sort" << std::endl;
 	
+	/*
 	bool affinity = false;
-	//bool affinity = false;
-	//int tid;
-	//int rc;	
-	//cpu_set_t cpuset;	
 	if(affinity && is_thread){
-		//tid = KNN::get_thread_id();
-		
-		//KNN::set_socket_affinity(cpuset, tid);
-	//	KNN::set_core_affinity(cpuset, tid);
-		//KNN::set_logical_affinity(cpuset, tid);
+
 		KNN::affinity();
 	}
-
+	*/
 
 	int rv;	
 
@@ -889,7 +813,7 @@ KNN::merge_sort(const std::vector<float*> &a, const Range &r,
 
 }
 
-float KNN::get_median_and_split(const std::vector<float*> &a, 
+inline float KNN::get_median_and_split(const std::vector<float*> &a, 
 					const unsigned long &dimension){
 	float median;	
 	unsigned long idx;	
@@ -930,6 +854,7 @@ float KNN::get_median_and_split(const std::vector<float*> &a,
 	return median;
 }
 
+//not used
 void KNN::split(const std::vector<float*> &a,
 				std::vector<float*> &left,
 				std::vector<float*> &right, 
@@ -951,7 +876,7 @@ void KNN::split(const std::vector<float*> &a,
 }
 
 
-unsigned long KNN::cycle_dimensions(unsigned long dim){
+inline unsigned long KNN::cycle_dimensions(unsigned long dim){
 	if(dim < (this->num_dimensions-1)) return dim+1;
 	return 0;
 }
@@ -1022,7 +947,7 @@ void KNN::results_to_file(){
 	
 }
 
-unsigned long KNN::urandom(){
+inline unsigned long KNN::urandom(){
 	unsigned long random = 0;
 	//size_t size = sizeof(random);
 	std::ifstream urandom("/dev/urandom");
@@ -1182,7 +1107,7 @@ void KNN::decrement_tmp_threads(){
 	}
 }
 
-void KNN::set_depth_init_mutex(){
+inline void KNN::set_depth_init_mutex(){
 	//if (pthread_mutex_init(&this->lock, NULL) != 0) { 
 	if(pthread_spin_init(&spinlock, 0) != 0){
         std::cout << "Problem initializing lock" << std::endl; 

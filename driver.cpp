@@ -75,22 +75,25 @@ int main(int argc, char **argv){
 		
 		//knn._check_output();	// THIS
 
-
+/*
 		auto tree_interval = 
 				std::chrono::duration_cast<std::chrono::milliseconds>
 				(tree_end-tree_start);
 		auto query_interval = 
 				std::chrono::duration_cast<std::chrono::milliseconds>
 				(query_end-tree_end);
+*/
+		std::chrono::duration<double> tree_interval = tree_end-tree_start;
+		std::chrono::duration<double> query_interval = query_end-tree_end;
 		//knn._print_results();		
 		//std::cout << "num_train " << t_info.num_pts << std::endl;
 		dealloc_info(&t_info, &q_info);
 		std::cout << "\t\t\t\t\t\t\tcores: " << cores << std::endl;
 		std::cout << "\t\t\t\t\t\t\ttree build time:\t" << tree_interval.count();
-		std::cout << std::endl;		
+		std::cout << " s" << std::endl;		
 		
 		std::cout << "\t\t\t\t\t\t\tquery time:\t\t" << query_interval.count();
-		std::cout << std::endl;		
+		std::cout << " s" << std::endl;		
 		std::cout << "total thread count:\t" << KNN::static_total_threads;
 		std::cout << std::endl;
 		std::cout << "tmp thread count:\t" << KNN::tmp_thread_count;
