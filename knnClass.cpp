@@ -1,7 +1,7 @@
 #include "knnClass.hpp"
-//std::atomic<unsigned long> thread_count{0};
+
 unsigned int KNN::static_depth;
-//pthread_mutex_t KNN::lock;
+
 pthread_spinlock_t KNN::spinlock;
 
 pthread_spinlock_t KNN::thread_lock;
@@ -20,8 +20,8 @@ KNN::~KNN(){
 	this->delete_nodes(this->root);
 	delete[] this->results;
 	free(result_f_name);
-	//pthread_mutex_destroy(&KNN::lock);
 	pthread_spin_destroy(&KNN::spinlock);
+	pthread_spin_destroy(&KNN::thread_lock);
 }
 
 void KNN::delete_nodes(Node* node){
@@ -31,29 +31,7 @@ void KNN::delete_nodes(Node* node){
 		delete node;
 	}
 }
-/*
-void KNN::make_tree(){
-	unsigned long idx = 0;
-	for(unsigned int i = 0; i < this->num_training_pts; ++i){
-		for(unsigned int j = 0; j < this->num_dimensions; ++j){
-			std::cout << this->train_pts[i][j] << ", ";
-		}
-		std::cout << std::endl;
-	}
-	std::cout << "-----------------" << std::endl;	
-	
-	qsort_r(this->train_pts, (size_t)this->num_training_pts, 
-						(sizeof(double**)), this->compare_by_dimension, &idx);
-	for(unsigned int i = 0; i < this->num_training_pts; ++i){
-		for(unsigned int j = 0; j < this->num_dimensions; ++j){
-			std::cout << this->train_pts[i][j] << ", ";
-		}
-		std::cout << std::endl;
-	}
-	std::cout << "-----------------" << std::endl;
-}
 
-*/
 
 void KNN::make_tree(){
 	this->set_depth_init_mutex();
@@ -168,7 +146,7 @@ void* KNN::populate_nodes(void* vp){
 	KNN::node_info* info = (KNN::node_info*)vp;	
 
 	
-	bool affinity = false;
+
 	//bool affinity = false;
 	//int tid;
 	//int rc;	
@@ -332,10 +310,10 @@ void KNN::do_queries(){
 	for(unsigned int i = 0; i < job_cores; i++){
 		w_info[i] = new work_info{i, work};	
 		rv = pthread_create(&(workers[i]), nullptr, adhoc_worker, (void*)(w_info[i]));
-		//if(rv != 0){
-		//	std::cout << "problem creating worker thread" << std::endl;
+		if(rv != 0){
+			std::cout << "problem creating worker thread" << std::endl;
 		//	exit(1);
-		//}
+		}
 	}
 	for(unsigned long i = 0; i < job_cores; i++){
 		rv = pthread_join(workers[i], nullptr);
@@ -387,17 +365,18 @@ void* KNN::adhoc_worker(void* vp){
 	CPU_ZERO(&cpuset);
 	CPU_SET(w_info->work_core % KNN::static_cores, &cpuset);
 	int rc = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
-    //if (rc != 0){
+    if (rc != 0){
     //	std::cerr << "Error setting affinity_here" << '\n';
+	}
    	//}
 	//*/
 	KNN::query_args * job;
 	while(true){
 		rv = pthread_spin_lock(&KNN::thread_lock);
-		//if(rv != 0){
-		//	std::cout << "problem locking in worker" << std::endl;
-		//	exit(1);
-		//}
+		if(rv != 0){
+			std::cout << "problem locking in worker" << std::endl;
+			exit(1);
+		}
 		idx = w_info->work.size();
 		//std::cout << "size: " << idx << std::endl;
 		if(idx == 0) {
@@ -732,16 +711,7 @@ KNN::merge_sort(const std::vector<float*> &a, const Range &r,
 	std::vector<float*> sorted;
 	sorted.reserve(size);
 
-	/*
-	std::cout << "merging..." << std::endl;
-	std::cout << "	left: " << std::endl;
-	for(auto i : l_sorted){
-		std::cout << "		" << i << std::endl;
-	}
-	for(auto i : r_sorted){
-		std::cout << "		" << i << std::endl;
-	}
-	*/
+
 	
 	
 	auto l_it = l_sorted.begin();
@@ -823,9 +793,7 @@ inline float KNN::get_median_and_split(const std::vector<float*> &a,
 		//std::cout << "in odd" << std::endl; // debug
 		idx = (a.size()/2); // dont add 1 because array idx strt @ 0 		
 		median = a[idx][dimension];
-		//left = new std::vector<float*>(a.begin(), a.begin() + idx);
-		//right = new std::vector<float*>(a.begin() + idx, a.end()); // right
-	}													// should have median
+	}													
 	else{
 		//std::cout << "in even" << std::endl; // debug
 		idx = a.size()/2;
@@ -834,26 +802,11 @@ inline float KNN::get_median_and_split(const std::vector<float*> &a,
 		
 	}
 	
-	/*	
-	unsigned long right_begin_idx = 0;	
-	for(unsigned long i = 0; i < a.size(); ++i){
-		if(a[i][dimension] >= median) break;
-		++right_begin_idx;
-	}
-	if(right_begin_idx == 0) {
-		right.assign(a.begin(), a.end());
-	} else if(right_begin_idx == a.size()){
-		left.assign(a.begin(), a.end());
-	} else {
-		left.assign(a.begin(), a.begin() + right_begin_idx);
-		right.assign(a.begin() + right_begin_idx, a.end());
-	}
-	*/
-	
-	//this->split(a, left, right, dimension, median);
+
 	return median;
 }
 
+/*
 //not used
 void KNN::split(const std::vector<float*> &a,
 				std::vector<float*> &left,
@@ -874,7 +827,7 @@ void KNN::split(const std::vector<float*> &a,
 		right.assign(a.begin() + right_begin_idx, a.end());
 	}
 }
-
+*/
 
 inline unsigned long KNN::cycle_dimensions(unsigned long dim){
 	if(dim < (this->num_dimensions-1)) return dim+1;
@@ -1120,6 +1073,23 @@ inline void KNN::set_depth_init_mutex(){
     }	
 	
 	KNN::static_cores = this->cores;
+	//unsigned int num_cores = this->cores;
+	/*	
+	if(num_cores == 1)
+	else if(num_cores == 1) KNN::thread_limit = 2
+	else if(num_cores == 1)
+	else if(num_cores == 1)
+	else if(num_cores == 1)
+	else if(num_cores == 1)
+	else if(num_cores == 1)
+	else if(num_cores == 1)
+	else if(num_cores == 1)
+	else if(num_cores == 1)
+	*/
+	//KNN::thread_limit = num_cores*3;
+	//this->static_depth = 10;
+	
+	
 	if(this->cores < 2){
 		this->static_depth = 1;
 		KNN::thread_limit = 2*KNN::static_cores;
@@ -1140,6 +1110,8 @@ inline void KNN::set_depth_init_mutex(){
 		this->static_depth = 5;
 		KNN::thread_limit = 30 + (2*KNN::static_cores);
 	}
+	
+	
 	//this->static_depth = 2;
 	//KNN::thread_limit = 2*this->cores; // 21
 	std::cout << "thread_limit:\t\t" << KNN::thread_limit << std::endl;
