@@ -9,7 +9,7 @@
 
 
 exec > scaling-out.txt
-cores=8
+cores=10
 for ((i=1;i<=$cores;i++));
 		do
 
